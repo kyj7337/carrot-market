@@ -1,5 +1,7 @@
 import { NextRequest } from 'next/server';
 
+// /** Server Action 이 있기 전에 API를 생성하는 방법 설명 */
+
 export async function GET(request: NextRequest) {
   console.log(request);
   return Response.json({
@@ -9,9 +11,6 @@ export async function GET(request: NextRequest) {
 
 export const POST = async (request: NextRequest) => {
   const data = await request.json();
-  console.log(data);
+
   return Response.json(data);
-  return Response.json({
-    ok: true,
-  });
 };
