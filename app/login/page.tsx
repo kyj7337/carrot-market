@@ -1,6 +1,6 @@
 'use client';
-import FormButton from '@/components/form-btn';
-import FormInput from '@/components/form-input';
+import FormButton from '@/components/btn';
+import Input from '@/components/input';
 import SocialLogin from '@/components/social-login';
 import { useFormState } from 'react-dom';
 import { onSubmit } from './action';
@@ -14,8 +14,8 @@ export default function LoginPage() {
         <h2 className='text-xl'>Login with email and password!</h2>
       </div>
       <form action={action} className='flex flex-col gap-3'>
-        <FormInput name='email' type='email' placeholder='email' required errors={[]} />
-        <FormInput
+        <Input name='email' type='email' placeholder='email' required errors={[]} />
+        <Input
           name='password'
           type='password'
           placeholder='password'

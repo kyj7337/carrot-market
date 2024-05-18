@@ -1,11 +1,11 @@
 'use client';
 import { useFormStatus } from 'react-dom';
 
-interface FormButtonProps {
+interface ButtonProps {
   text: string;
 }
 
-export default function FormButton(props: FormButtonProps) {
+export default function Button(props: ButtonProps) {
   const { text } = props;
   /** useFormStatus 는 form 의 자식 컴포넌트에서 사용해야하며, client 컴포넌트에서 실행되어야 한다. (에러코드에서 설명됨)
    */
