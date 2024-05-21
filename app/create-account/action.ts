@@ -1,11 +1,12 @@
 'use server';
+import { ERROR_MESSAGE, PASSWORD_MIN_LENGTH, PASSWORD_REGEX } from '@/lib/constants';
 import { z } from 'zod';
 
 const userNameSchema = z.string().min(5).max(10);
 const checkUserName = (input: string) => {
   return !input.includes('potato');
 };
-const passwordRegex = new RegExp(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).+$/);
+
 const checkPassword = ({
   password,
   confirmPassword,
@@ -23,8 +24,8 @@ const formSchema = z
         required_error: 'userName field is gone',
         invalid_type_error: 'userName must be string',
       })
-      .min(3, 'too short')
-      .max(10, 'too long')
+      .min(3, ERROR_MESSAGE.USERNAME_SHORT)
+      .max(10, ERROR_MESSAGE.USERNAME_LONG)
       .trim()
       .refine(checkUserName, 'custom error'),
     email: z
@@ -34,21 +35,21 @@ const formSchema = z
       })
 
       .toLowerCase()
-      .email('이메일 형식이어야 합니다.'),
+      .email(ERROR_MESSAGE.EMAIL_FORM),
     password: z
       .string({
         required_error: '패스워드가 필요합니다.',
       })
-      .min(10, '패스워드가 너무 짧습니다')
-      .regex(passwordRegex, '소문자,대문자,특수문자를 포함해야 합니다.'),
+      .min(PASSWORD_MIN_LENGTH, '')
+      .regex(PASSWORD_REGEX, ERROR_MESSAGE.EMAIL_REG),
     confirmPassword: z
       .string({
         required_error: '패스워드가 필요합니다.',
       })
-      .min(10, '패스워드가 너무 짧습니다'),
+      .min(PASSWORD_MIN_LENGTH, ERROR_MESSAGE.PASSWORD_TOO_SHORT),
   })
   .refine(checkPassword, {
-    message: '패스워드가 일치하지 않습니다.',
+    message: ERROR_MESSAGE.PASSWORD_NOT_MATCHED,
     path: ['confirmPassword'],
   });
 
