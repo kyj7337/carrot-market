@@ -1,11 +1,10 @@
 'use server';
 import { ERROR_MESSAGE, PASSWORD_MIN_LENGTH, PASSWORD_REGEX } from '@/lib/constants';
-import { getIronSession } from 'iron-session';
 import { hash } from 'bcrypt';
 import db from '@/lib/db';
 import { z } from 'zod';
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import getSession from '@/lib/session';
 
 const userNameSchema = z.string().min(5).max(10);
 const checkUserName = (input: string) => {
@@ -57,16 +56,16 @@ const formSchema = z
       .min(3, ERROR_MESSAGE.USERNAME_SHORT)
       .max(10, ERROR_MESSAGE.USERNAME_LONG)
       .trim()
-      .refine(checkUserName, 'custom error')
-      .refine(checkUniqueUserName, 'this user name is already taken.'),
+      .refine(checkUserName, 'custom error'),
+    // .refine(checkUniqueUserName, 'this user name is already taken.'),
     email: z
       .string({
         required_error: 'email field is gone',
         invalid_type_error: 'email must be string',
       })
       .toLowerCase()
-      .email(ERROR_MESSAGE.EMAIL_FORM)
-      .refine(checkUniqueEmail, 'email is already exists.'),
+      .email(ERROR_MESSAGE.EMAIL_FORM),
+    // .refine(checkUniqueEmail, 'email is already exists.'),
     password: z
       .string({
         required_error: '패스워드가 필요합니다.',
@@ -79,13 +78,51 @@ const formSchema = z
       })
       .min(PASSWORD_MIN_LENGTH, ERROR_MESSAGE.PASSWORD_TOO_SHORT),
   })
+
+  .superRefine(async ({ userName }, ctx) => {
+    const user = await db.user.findUnique({
+      where: {
+        username: userName,
+      },
+      select: {
+        id: true,
+      },
+    });
+    if (user) {
+      ctx.addIssue({
+        code: 'custom',
+        fatal: true,
+        message: '이미 사용중인 유저명 입니다.',
+        path: ['userName'],
+      });
+      return z.NEVER; // * 나머지 검사를 진행하지 않도록 얼리 리턴한다.
+    }
+  })
+  .superRefine(async ({ email }, ctx) => {
+    const user = await db.user.findUnique({
+      where: {
+        email,
+      },
+      select: {
+        id: true,
+      },
+    });
+    if (user) {
+      ctx.addIssue({
+        code: 'custom',
+        fatal: true,
+        message: '이미 사용중인 이메일 입니다.',
+        path: ['email'],
+      });
+      return z.NEVER; // * 나머지 검사를 진행하지 않도록 얼리 리턴한다.
+    }
+  })
   .refine(checkPassword, {
     message: ERROR_MESSAGE.PASSWORD_NOT_MATCHED,
     path: ['confirmPassword'],
   });
 
 export const createAccount = async (prevState: any, formData: FormData) => {
-  console.log(cookies());
   const data = {
     email: formData.get('email'),
     userName: formData.get('userName'),
@@ -95,6 +132,7 @@ export const createAccount = async (prevState: any, formData: FormData) => {
   // formSchema.parse(data); // * 에러를 throw 함.
   const result = await formSchema.safeParseAsync(data); // * 에러를 throw 하지 않음
   if (!result.success) {
+    console.log(result.error.flatten());
     return result.error.flatten();
   } else {
     const hashedPassword = await hash(result.data.password, 12);
@@ -109,21 +147,10 @@ export const createAccount = async (prevState: any, formData: FormData) => {
       },
     });
 
-    console.log(user);
+    const session = await getSession();
 
-    const cookie = await getIronSession(cookies(), {
-      cookieName: 'delicious-karrot',
-      password: process.env.COOKIE_PASSWORD!,
-    });
-    //@ts-ignore
-    cookie.id = user.id;
-    await cookie.save();
+    session.id = user.id;
+    await session.save();
     redirect('/profile');
-    // * 1. 유저의 이름이 이미 있는지 확인한다
-    // * 2. 이메일이 존재 하는지 확인한다.
-    // * 3. hash password
-    // * 4. DB에 유저 저장
-    // * 5. 로그인 시킨다.
-    // * 6. 리다이렉트 시킨다 (홈으로)
   }
 };
