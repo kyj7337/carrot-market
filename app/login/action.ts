@@ -4,7 +4,7 @@ import { compare } from 'bcrypt';
 import db from '@/lib/db';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
-import getSession from '@/lib/session';
+import getSession, { sessionLogin } from '@/lib/session';
 
 const checkEmailExists = async (email: string) => {
   const user = await db.user.findUnique({
@@ -47,9 +47,7 @@ export const login = async (prevState: any, data: FormData) => {
     const passwordValidate = await compare(result.data.password, user?.password!);
     console.log({ passwordValidate });
     if (passwordValidate) {
-      const session = await getSession();
-      session.id = user!.id; // * user가 있다고 선언한 뒤 id를 꺼내씀
-      await session.save();
+      sessionLogin(user!.id);
       redirect('/profile');
     } else {
       return {

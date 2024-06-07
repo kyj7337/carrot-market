@@ -4,7 +4,7 @@ import { hash } from 'bcrypt';
 import db from '@/lib/db';
 import { z } from 'zod';
 import { redirect } from 'next/navigation';
-import getSession from '@/lib/session';
+import getSession, { sessionLogin } from '@/lib/session';
 
 const userNameSchema = z.string().min(5).max(10);
 const checkUserName = (input: string) => {
@@ -147,10 +147,8 @@ export const createAccount = async (prevState: any, formData: FormData) => {
       },
     });
 
-    const session = await getSession();
+    await sessionLogin(user.id);
 
-    session.id = user.id;
-    await session.save();
     redirect('/profile');
   }
 };
