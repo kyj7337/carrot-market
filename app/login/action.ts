@@ -43,9 +43,9 @@ export const login = async (prevState: any, data: FormData) => {
       },
       select: { id: true, password: true },
     });
-    console.log(result.data);
+    // console.log(result.data);
     const passwordValidate = await compare(result.data.password, user?.password!);
-    console.log({ passwordValidate });
+    // console.log({ passwordValidate });
     if (passwordValidate) {
       sessionLogin(user!.id);
       redirect('/profile');
