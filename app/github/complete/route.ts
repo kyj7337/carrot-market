@@ -1,6 +1,5 @@
 import db from '@/lib/db';
-import getSession, { sessionLogin } from '@/lib/session';
-
+import { sessionLogin } from '@/lib/session';
 import { notFound, redirect } from 'next/navigation';
 import { NextRequest, NextResponse } from 'next/server';
 import { getAccessTokenByCode, getGithubUserInfo } from './util';

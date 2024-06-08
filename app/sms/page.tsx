@@ -11,7 +11,6 @@ const initState = {
 
 export default function SmsPage() {
   const [state, action] = useFormState(smsAction, initState);
-  console.log(state);
   return (
     <div className='flex flex-col gap-10 py-8 px-6'>
       <div className='flex flex-col gap-2 *:font-medium'>
