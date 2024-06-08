@@ -11,20 +11,20 @@ async function getUser() {
         id: session.id,
       },
     });
+
     if (user) {
       return user;
     }
     notFound();
   }
-  notFound();
 }
 
-export default async function Profile() {
+export default async function Page() {
   const user = await getUser();
   const logout = async () => {
     'use server';
     const session = await getSession();
-    await session.destroy();
+    session.destroy();
     redirect('/');
   };
   return (

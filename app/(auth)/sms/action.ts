@@ -141,7 +141,7 @@ export const smsAction = async (prevState: smsActionPrevState, data: FormData) =
         });
       }
 
-      redirect('/profile');
+      redirect('/profiles');
     }
   }
 };

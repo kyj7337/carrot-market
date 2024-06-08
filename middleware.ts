@@ -15,10 +15,12 @@ const publicOnlyUrls: Routes = {
 };
 
 export async function middleware(req: NextRequest) {
+  console.log('middleware');
   // * middleware 라는 이름으로 지정해야함 (framework)
   const session = await getSession();
 
   const exists = publicOnlyUrls[req.nextUrl.pathname];
+
   if (!session.id) {
     if (!exists) {
       return NextResponse.redirect(new URL('/', req.url));

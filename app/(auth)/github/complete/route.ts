@@ -31,7 +31,7 @@ export const GET = async (req: NextRequest) => {
   });
   if (user) {
     await sessionLogin(user.id);
-    return redirect('/profile');
+    return redirect('/profiles');
   }
   const newUser = await db.user.create({
     data: {
@@ -45,5 +45,5 @@ export const GET = async (req: NextRequest) => {
   });
 
   await sessionLogin(newUser.id);
-  return redirect('/profile');
+  return redirect('/profiles');
 };

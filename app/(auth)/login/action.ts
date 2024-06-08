@@ -48,7 +48,7 @@ export const login = async (prevState: any, data: FormData) => {
     // console.log({ passwordValidate });
     if (passwordValidate) {
       sessionLogin(user!.id);
-      redirect('/profile');
+      redirect('/profiles');
     } else {
       return {
         fieldErrors: {

@@ -149,6 +149,6 @@ export const createAccount = async (prevState: any, formData: FormData) => {
 
     await sessionLogin(user.id);
 
-    redirect('/profile');
+    redirect('/profiles');
   }
 };
