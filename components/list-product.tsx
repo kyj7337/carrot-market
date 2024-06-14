@@ -11,7 +11,6 @@ interface ListProductProps {
 }
 
 export default function ListProduct({ photo, title, price, created_at, id }: ListProductProps) {
-  console.log(created_at);
   return (
     <Link href={`/products/${id}`} className='flex gap-5'>
       <div className='relative size-28 rounded-md overflow-hidden'>
