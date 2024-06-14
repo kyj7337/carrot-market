@@ -29,7 +29,7 @@ async function getProduct(id: number) {
       },
     },
   });
-  console.log(product);
+
   return product;
 }
 /**
@@ -52,7 +52,7 @@ export default async function ProductDetail({ params }: { params: { id: string }
   return (
     <div>
       <div className='relative aspect-square'>
-        <Image src={product.photo} fill alt={product.title} />
+        <Image src={product.photo} fill alt={product.title} className='object-cover' />
       </div>
       <div className='p-5 flex items-center gap-3 border-b border-neutral-700'>
         <div className='size-10 rounded-full overflow-hidden'>
