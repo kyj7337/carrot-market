@@ -14,7 +14,7 @@ export default function ListProduct({ photo, title, price, created_at, id }: Lis
   return (
     <Link href={`/products/${id}`} className='flex gap-5'>
       <div className='relative size-28 rounded-md overflow-hidden'>
-        <Image src={photo} alt={title} fill className='object-cover' />
+        <Image src={`${photo}/avatar`} alt={title} fill className='object-cover' />
         {/* fill 을 하면 부모 컴포넌트를 꽉 채우게 됨.   */}
       </div>
       <div className='flex flex-col gap-1 *:text-white'>
