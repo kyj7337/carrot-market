@@ -20,11 +20,9 @@ interface RootLayoutProps {
 export default function RootLayout(props: Readonly<RootLayoutProps>) {
   const { children, potato } = props;
 
-  console.log(props);
   return (
     <html lang='en'>
       <body className={`${inter.className} bg-neutral-900 text-white max-w-screen-sm mx-auto`}>
-        {potato}
         {children}
       </body>
     </html>
