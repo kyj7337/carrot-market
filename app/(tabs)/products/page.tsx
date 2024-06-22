@@ -29,7 +29,7 @@ const getCachedProducts = nextCache(getProducts, ['home-products']);
 export type InitialProducts = Prisma.PromiseReturnType<typeof getProducts>;
 
 export default async function Page() {
-  const initialProducts = await getCachedProducts();
+  const initialProducts = await getProducts();
 
   const revalidate = async () => {
     'use server';
