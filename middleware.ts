@@ -15,7 +15,6 @@ const publicOnlyUrls: Routes = {
 };
 
 export async function middleware(req: NextRequest) {
-  console.log('middleware');
   // * middleware 라는 이름으로 지정해야함 (framework)
   const session = await getSession();
 
