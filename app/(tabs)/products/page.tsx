@@ -28,6 +28,11 @@ const getCachedProducts = nextCache(getProducts, ['home-products']);
 
 export type InitialProducts = Prisma.PromiseReturnType<typeof getProducts>;
 
+/** 빌드 할 때, static으로 되지 않고 dynamic 으로 빌드 한다. */
+// export const dynamic = 'force-dynamic';
+/** revalidate 주기 60초 */
+export const revalidate = 60;
+
 export default async function Page() {
   const initialProducts = await getProducts();
 

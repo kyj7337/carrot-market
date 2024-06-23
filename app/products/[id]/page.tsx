@@ -1,5 +1,5 @@
 import db from '@/lib/db';
-import getSession from '@/lib/session';
+// import getSession from '@/lib/session'; // * [id] 가 params 로 들어가는 지금 페이지에서, id의 종류를 미리 빌드 시켜놓기 위해 getSession을 사용하지 않을 예정. getIsOwner 함수도 주석처리되어 있음.
 import { formatToWon } from '@/lib/utils';
 import { UserIcon } from '@heroicons/react/24/solid';
 import Image from 'next/image';
@@ -10,10 +10,10 @@ import DeleteButton from '@/components/delete-button';
 import { unstable_cache as nextCache, revalidateTag } from 'next/cache';
 
 async function getIsOwner(userId: number) {
-  const session = await getSession();
-  if (session.id) {
-    return session.id === userId;
-  }
+  // const session = await getSession();
+  // if (session.id) {
+  //   return session.id === userId;
+  // }
   return false;
 }
 async function getProduct(id: number) {
@@ -155,4 +155,20 @@ export default async function ProductDetail({ params }: { params: { id: string }
       </div>
     </div>
   );
+}
+/** true: 미리 생성되지 않은 페이지들이 dynamic 페이지로 간주됨. (default)
+ * false: 빌드할 때 생성해놓은 페이지만 찾을 수 있음. (빌드 할 때, 없는 페이지에 접근하려고 하면 404 페이지로 감.)
+ */
+export const dynamicParams = true;
+
+/** next 에서 정해져 있는 함수 이름임.
+ * @description 빌드할 때, params로 받는 몇몇 케이스는 static 하게 생성해놓겠다는 함수임.
+ */
+export async function generateStaticParams() {
+  const products = await db.product.findMany({
+    select: {
+      id: true,
+    },
+  });
+  return products.map((product) => ({ id: String(product.id) }));
 }
