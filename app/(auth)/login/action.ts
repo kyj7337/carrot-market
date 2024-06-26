@@ -5,6 +5,7 @@ import db from '@/lib/db';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import getSession, { sessionLogin } from '@/lib/session';
+import { Prisma } from '@prisma/client';
 
 const checkEmailExists = async (email: string) => {
   const user = await db.user.findUnique({
