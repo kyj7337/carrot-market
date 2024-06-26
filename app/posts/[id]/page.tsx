@@ -6,9 +6,10 @@ import {
   EyeIcon as OutlineEyeIcon,
   HandThumbUpIcon as OutlineHandThumbUpIcon,
 } from '@heroicons/react/24/outline';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, unstable_cache as nextCache } from 'next/cache';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
+import LikeButton from '@/components/like-button';
 
 async function getPost(id: number) {
   try {
@@ -31,7 +32,6 @@ async function getPost(id: number) {
         _count: {
           select: {
             comments: true,
-            likes: true,
           },
         },
       },
@@ -42,18 +42,28 @@ async function getPost(id: number) {
   }
 }
 
-async function getIsLiked(id: number) {
-  const session = await getSession();
+async function getLikeStatus(id: number, userId: number) {
+  // const session = await getSession();
+
   const isLiked = await db.like.findUnique({
     where: {
       id: {
         postId: id,
-        userId: session.id!,
+        userId,
       },
     },
   });
-  console.log({ isLiked });
-  return Boolean(isLiked);
+
+  const likeCount = await db.like.count({
+    where: {
+      postId: id,
+    },
+  });
+  // console.log('DB: ', isLiked, likeCount);
+  return {
+    likeCount,
+    isLiked: Boolean(isLiked),
+  };
 }
 
 interface PostDetailProps {
@@ -62,6 +72,9 @@ interface PostDetailProps {
   };
 }
 
+const cachedPost = nextCache(getPost, ['post-detail']);
+const cachedLikeStatus = nextCache(getLikeStatus, ['like-status']);
+
 export default async function PostDetail(props: PostDetailProps) {
   const { params } = props;
   const { id } = params;
@@ -69,46 +82,13 @@ export default async function PostDetail(props: PostDetailProps) {
   if (isNaN(postId)) {
     return notFound();
   }
+  const session = await getSession();
 
-  const post = await getPost(postId);
+  const post = await cachedPost(postId);
 
   if (!post) return notFound();
-  console.log(post);
 
-  const dislikePost = async () => {
-    'use server';
-    const session = await getSession();
-    try {
-      /** 두번 연속으로 클릭되는걸 방지하는 작업 필요. */
-      await db.like.delete({
-        where: {
-          id: {
-            postId,
-            userId: session.id!,
-          },
-        },
-      });
-      // revalidatePath(`/post/${id}`);
-    } catch (err) {}
-  };
-
-  const likePost = async () => {
-    'use server';
-    const session = await getSession();
-    try {
-      await db.like.create({
-        data: {
-          postId,
-          userId: session.id!,
-        },
-      });
-      // revalidatePath(`/post/${id}`);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const isLiked = await getIsLiked(postId);
+  const { isLiked, likeCount } = await cachedLikeStatus(postId, session.id!);
 
   return (
     <div className='p-5 text-white'>
@@ -134,24 +114,12 @@ export default async function PostDetail(props: PostDetailProps) {
           <EyeIcon className='size-5' />
           <span>조회 {post.views}</span>
         </div>
-        <form action={isLiked ? dislikePost : likePost}>
-          <button
-            className={`flex items-center gap-2 text-neutral-400 text-sm border border-neutral-400 rounded-full p-2  transition-colors
-              ${isLiked ? 'bg-orange-500 text-white border-orange-500' : 'hover:bg-neutral-800'}
-              `}
-          >
-            {isLiked ? (
-              <HandThumbUpIcon className='size-5' />
-            ) : (
-              <OutlineHandThumbUpIcon className='size-5' />
-            )}
-            {isLiked ? (
-              <span>{post._count.likes}</span>
-            ) : (
-              <span>공감하기 ({post._count.likes})</span>
-            )}
-          </button>
-        </form>
+
+        <LikeButton isLiked={isLiked} likeCount={likeCount} postId={post.id} />
+
+        {/* <form action={isLiked ? dislikePost : likePost}>
+          <LikeButton isLiked={isLiked} likeCount={likeCount} />
+        </form> */}
       </div>
     </div>
   );
