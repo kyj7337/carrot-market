@@ -56,3 +56,14 @@ export default async function Page() {
     </div>
   );
 }
+
+export const getComments = async (postId: number) => {
+  const comments = await db.comment.findMany({
+    where: {
+      postId,
+    },
+  });
+  return comments;
+};
+
+export type CommentsType = Prisma.PromiseReturnType<typeof getComments>;

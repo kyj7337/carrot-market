@@ -2,6 +2,7 @@ import db from '@/lib/db';
 import getSession from '@/lib/session';
 import { formatToTimeAgo } from '@/lib/utils';
 import { EyeIcon, HandThumbUpIcon } from '@heroicons/react/24/solid';
+import Comment from '@/components/comment';
 import {
   EyeIcon as OutlineEyeIcon,
   HandThumbUpIcon as OutlineHandThumbUpIcon,
@@ -10,6 +11,10 @@ import { revalidatePath, unstable_cache as nextCache } from 'next/cache';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import LikeButton from '@/components/like-button';
+import Input from '@/components/input';
+import { commentAction } from './action';
+import CommentList from '@/components/comment-list';
+import { getComments } from '@/app/(tabs)/products/page';
 
 async function getPost(id: number) {
   try {
@@ -89,7 +94,7 @@ export default async function PostDetail(props: PostDetailProps) {
   if (!post) return notFound();
 
   const { isLiked, likeCount } = await cachedLikeStatus(postId, session.id!);
-
+  const comments = await getComments(post.id);
   return (
     <div className='p-5 text-white'>
       <div className='flex items-center gap-2 mb-2'>
@@ -117,9 +122,7 @@ export default async function PostDetail(props: PostDetailProps) {
 
         <LikeButton isLiked={isLiked} likeCount={likeCount} postId={post.id} />
 
-        {/* <form action={isLiked ? dislikePost : likePost}>
-          <LikeButton isLiked={isLiked} likeCount={likeCount} />
-        </form> */}
+        <Comment comments={comments} postId={postId} />
       </div>
     </div>
   );
