@@ -5,15 +5,16 @@ import { UserIcon } from '@heroicons/react/24/solid';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import { deleteProduct } from './action';
+import { createChatRoom, deleteProduct } from './action';
 import DeleteButton from '@/components/delete-button';
 import { unstable_cache as nextCache, revalidateTag } from 'next/cache';
+import getSession from '@/lib/session';
 
 async function getIsOwner(userId: number) {
-  // const session = await getSession();
-  // if (session.id) {
-  //   return session.id === userId;
-  // }
+  const session = await getSession();
+  if (session.id) {
+    return session.id === userId;
+  }
   return false;
 }
 async function getProduct(id: number) {
@@ -32,6 +33,7 @@ async function getProduct(id: number) {
         select: {
           username: true,
           avatar: true,
+          id: true,
         },
       },
     },
@@ -95,17 +97,23 @@ export default async function ProductDetail({ params }: { params: { id: string }
   if (isNaN(id)) {
     return notFound();
   }
-
+  const session = await getSession();
   const product = await getCachedProduct(id);
 
   if (!product) {
     return notFound();
   }
   const isOwner = await getIsOwner(product.userId);
+  console.log(session.id, product.userId);
 
   const revalidate = async () => {
     'use server';
     revalidateTag('xxxx');
+  };
+
+  const wrapperdCreateChatRoom = async () => {
+    'use server';
+    await createChatRoom(product.userId);
   };
 
   return (
@@ -136,22 +144,12 @@ export default async function ProductDetail({ params }: { params: { id: string }
             <button>Revalidate title cache</button>
           </form>
         ) : (
-          <Link className='bg-orange-500 px-5 py-2.5 rounded-md text-white font-semibold' href={``}>
-            채팅하기
-          </Link>
+          <form action={wrapperdCreateChatRoom}>
+            <button className='bg-orange-500 px-5 py-2.5 rounded-md text-white font-semibold'>
+              채팅하기
+            </button>
+          </form>
         )}
-        {/* {isOwner ? (
-          <DeleteButton id={id} />
-        ) : (
-          // <form action={() => deleteProduct(id)}>
-          //   <button className='bg-red-500 px-5 py-2.5 rounded-md text-white font-semibold'>
-          //     삭제하기
-          //   </button>
-          // </form>
-          <Link className='bg-orange-500 px-5 py-2.5 rounded-md text-white font-semibold' href={``}>
-            채팅하기
-          </Link>
-        )} */}
       </div>
     </div>
   );
