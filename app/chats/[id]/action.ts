@@ -48,3 +48,17 @@ export async function getMessages(chatRoomId: string) {
 
 /** DB리턴타입 */
 export type InitialChatMessageType = Prisma.PromiseReturnType<typeof getMessages>;
+
+export async function getUserProfile() {
+  const session = await getSession();
+  const user = await db.user.findUnique({
+    where: {
+      id: session.id!,
+    },
+    select: {
+      username: true,
+      avatar: true,
+    },
+  });
+  return user;
+}

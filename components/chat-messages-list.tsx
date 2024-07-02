@@ -1,17 +1,92 @@
 'use client';
 import { InitialChatMessageType } from '@/app/chats/[id]/action';
 import { formatToTimeAgo } from '@/lib/utils';
+import { ArrowUpCircleIcon } from '@heroicons/react/24/solid';
 import Image from 'next/image';
-import { useState } from 'react';
+import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react';
+import { RealtimeChannel, createClient } from '@supabase/supabase-js';
 
 interface ChatMessageListProps {
   initialMessages: InitialChatMessageType;
   userId: number;
+  chatRoomId: string;
+  username: string;
+  avatar: string | null;
 }
 
-export default function ChatMessagesList({ initialMessages, userId }: ChatMessageListProps) {
+// * 가이드: https://supabase.com/docs/guides/realtime/broadcast
+
+const SUPABASE_URL = 'https://csbeiabnhqocrslfgbdq.supabase.co';
+const SUPABASE_KEY =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNzYmVpYWJuaHFvY3JzbGZnYmRxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTk5MjYwODQsImV4cCI6MjAzNTUwMjA4NH0.t108LfpZqTODerlX9gamWQjqLr4Y2bCexA__SjE8_4Y';
+
+export default function ChatMessagesList({
+  chatRoomId,
+  initialMessages,
+  userId,
+  username,
+  avatar,
+}: ChatMessageListProps) {
   const [messages, setMessages] = useState(initialMessages);
-  console.log(messages);
+  const [text, setText] = useState('');
+  const channel = useRef<RealtimeChannel>();
+
+  useEffect(() => {
+    const client = createClient(SUPABASE_URL, SUPABASE_KEY);
+    channel.current = client.channel(`room-${chatRoomId}`);
+    channel.current
+      .on(
+        'broadcast',
+        {
+          event: 'message',
+        },
+        (payload) => {
+          setMessages((prev) => [...prev, payload.payload]);
+        }
+      )
+      .subscribe();
+    return () => {
+      channel.current?.unsubscribe();
+    };
+  }, []);
+
+  const onChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setText(e.target.value);
+  };
+
+  const onSubmit = (e: FormEvent) => {
+    e.preventDefault();
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: Date.now(),
+        payload: text,
+        created_at: new Date(),
+        userId,
+        user: {
+          avatar: '',
+          username: 'example',
+        },
+      },
+    ]);
+    channel.current?.send({
+      event: 'message',
+      type: 'broadcast',
+      payload: {
+        id: Date.now(),
+        payload: text,
+        userId,
+        created_at: new Date(),
+        user: {
+          avatar,
+          username,
+        },
+      },
+    });
+    setText('');
+  };
+
   return (
     <div className='p-5 flex flex-col gap-5 min-h-screen justify-end'>
       {messages.map((message) => {
@@ -26,7 +101,7 @@ export default function ChatMessagesList({ initialMessages, userId }: ChatMessag
             ) : (
               <Image
                 src={message.user.avatar!}
-                alt=''
+                alt='ff'
                 width={50}
                 height={50}
                 className='size-12 rounded-full'
@@ -43,6 +118,20 @@ export default function ChatMessagesList({ initialMessages, userId }: ChatMessag
           </div>
         );
       })}
+      <form className='flex relative' onSubmit={onSubmit}>
+        <input
+          required
+          onChange={onChange}
+          value={text}
+          className='bg-transparent rounded-full w-full h-10 focus:outline-none px-5 ring-2 focus:ring-4 transition ring-neutral-200 focus:ring-neutral-50 border-none placeholder:text-neutral-400'
+          type='text'
+          name='message'
+          placeholder='Write a message...'
+        />
+        <button className='absolute right-0'>
+          <ArrowUpCircleIcon className='size-10 text-orange-500 transition-colors hover:text-orange-300' />
+        </button>
+      </form>
     </div>
   );
 }

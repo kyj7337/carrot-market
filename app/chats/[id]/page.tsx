@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { getMessages, getRoom } from './action';
+import { getMessages, getRoom, getUserProfile } from './action';
 import ChatMessagesList from '@/components/chat-messages-list';
 import getSession from '@/lib/session';
 
@@ -11,11 +11,20 @@ export default async function ChatRoom({
   };
 }) {
   const { id } = params;
-  console.log(id);
+  // console.log(id);
   const room = await getRoom(id);
   if (!room) return notFound();
   const initialMessages = await getMessages(id);
   const session = await getSession();
-
-  return <ChatMessagesList userId={session.id!} initialMessages={initialMessages} />;
+  const user = await getUserProfile();
+  if (!user) return notFound();
+  return (
+    <ChatMessagesList
+      chatRoomId={id}
+      userId={session.id!}
+      initialMessages={initialMessages}
+      username={user.username}
+      avatar={user.avatar}
+    />
+  );
 }
