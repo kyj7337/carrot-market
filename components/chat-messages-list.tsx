@@ -1,5 +1,5 @@
 'use client';
-import { InitialChatMessageType } from '@/app/chats/[id]/action';
+import { InitialChatMessageType, saveMessage } from '@/app/chats/[id]/action';
 import { formatToTimeAgo } from '@/lib/utils';
 import { ArrowUpCircleIcon } from '@heroicons/react/24/solid';
 import Image from 'next/image';
@@ -54,7 +54,7 @@ export default function ChatMessagesList({
     setText(e.target.value);
   };
 
-  const onSubmit = (e: FormEvent) => {
+  const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
     setMessages((prev) => [
@@ -84,6 +84,7 @@ export default function ChatMessagesList({
         },
       },
     });
+    await saveMessage(text, chatRoomId);
     setText('');
   };
 
