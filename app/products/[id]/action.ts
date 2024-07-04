@@ -13,7 +13,6 @@ export async function deleteProduct(id: number) {
 }
 
 export async function createChatRoom(productUserId: number) {
-  console.log('hello');
   const session = await getSession();
 
   const room = await db.chatRoom.create({
