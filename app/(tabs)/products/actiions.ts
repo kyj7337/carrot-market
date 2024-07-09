@@ -1,5 +1,6 @@
 'use server';
 import db from '@/lib/db';
+import { Prisma } from '@prisma/client';
 
 export async function getMoreProducts(page: number) {
   const size = 1;
@@ -19,3 +20,14 @@ export async function getMoreProducts(page: number) {
   });
   return products;
 }
+
+export const getComments = async (postId: number) => {
+  const comments = await db.comment.findMany({
+    where: {
+      postId,
+    },
+  });
+  return comments;
+};
+
+export type CommentsType = Prisma.PromiseReturnType<typeof getComments>;

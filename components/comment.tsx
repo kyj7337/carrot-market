@@ -1,5 +1,5 @@
 'use client';
-import { CommentsType } from '@/app/(tabs)/products/page';
+import { CommentsType } from '@/app/(tabs)/products/actiions';
 import CommentList from './comment-list';
 import Input from './input';
 import { startTransition, useOptimistic, useState } from 'react';

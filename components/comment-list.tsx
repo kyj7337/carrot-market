@@ -1,7 +1,5 @@
 'use client';
 
-import { CommentsType } from '@/app/(tabs)/products/page';
-
 interface CommentsListProps {
   comments: string[];
 }

@@ -14,7 +14,7 @@ import LikeButton from '@/components/like-button';
 import Input from '@/components/input';
 import { commentAction } from './action';
 import CommentList from '@/components/comment-list';
-import { getComments } from '@/app/(tabs)/products/page';
+import { getComments } from '@/app/(tabs)/products/actiions';
 
 async function getPost(id: number) {
   try {
