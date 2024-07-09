@@ -32,6 +32,16 @@ export type InitialProducts = Prisma.PromiseReturnType<typeof getProducts>;
 // export const dynamic = 'force-dynamic';
 /** revalidate 주기 60초 */
 export const revalidate = 60;
+export const getComments = async (postId: number) => {
+  const comments = await db.comment.findMany({
+    where: {
+      postId,
+    },
+  });
+  return comments;
+};
+
+export type CommentsType = Prisma.PromiseReturnType<typeof getComments>;
 
 export default async function Page() {
   const initialProducts = await getProducts();
@@ -56,14 +66,3 @@ export default async function Page() {
     </div>
   );
 }
-
-export const getComments = async (postId: number) => {
-  const comments = await db.comment.findMany({
-    where: {
-      postId,
-    },
-  });
-  return comments;
-};
-
-export type CommentsType = Prisma.PromiseReturnType<typeof getComments>;
