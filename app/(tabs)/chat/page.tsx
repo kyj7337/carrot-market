@@ -12,7 +12,6 @@ export default async function Page() {
     <div>
       {chatrooms.map((item) => {
         const others = item.users.filter((elem) => elem.id !== session.id)[0];
-        console.log(item);
         return (
           <Link
             href={`/chats/${item.id}`}
