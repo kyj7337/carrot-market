@@ -3,9 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "postinstall": "prisma generate && npx prisma db push",
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && prisma migrate deploy && next build",
     "start": "next start",
     "lint": "next lint",
     "DB업데이트": "schema.prsima를 수정하면 DB에 알려줘야 하기 때문에 아래 명령어 실행하기",
